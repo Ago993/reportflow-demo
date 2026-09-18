@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ReportFlow — Report automatici da CSV</title>
+  <meta name="description" content="Demo portfolio: carica un CSV e genera KPI, analisi per categoria e report stampabile.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <span class="eyebrow">DEMO PORTFOLIO · REPORT AUTOMATICI</span>
+      <h1>ReportFlow</h1>
+      <p>Trasforma un CSV di vendite in un report leggibile con KPI, margini, categorie e andamento mensile.</p>
+      <div class="privacy">🔒 Elaborazione locale nel browser: nessun file viene inviato a un server.</div>
+    </header>
+
+    <section class="panel no-print">
+      <label class="upload-card">
+        <strong>Carica dati vendite</strong>
+        <span>CSV con data, categoria, ricavi e costi</span>
+        <input id="fileInput" type="file" accept=".csv,text/csv">
+        <small id="fileName">Nessun file selezionato</small>
+      </label>
+      <div class="actions">
+        <button id="sampleBtn" class="secondary">Carica dati demo</button>
+        <button id="analyzeBtn" class="primary" disabled>Genera report</button>
+      </div>
+      <p class="hint">Riconoscimento automatico di intestazioni comuni: data/date, categoria/category, ricavi/revenue, costi/cost.</p>
+    </section>
+
+    <section id="report" class="report hidden">
+      <div class="report-head">
+        <div>
+          <span class="eyebrow">REPORT GENERATO</span>
+          <h2>Performance commerciale</h2>
+          <p id="periodLabel"></p>
+        </div>
+        <div class="report-actions no-print">
+          <button id="exportBtn" class="secondary">Esporta riepilogo CSV</button>
+          <button id="printBtn" class="primary">Stampa / Salva PDF</button>
+        </div>
+      </div>
+
+      <div id="kpis" class="kpi-grid"></div>
+
+      <div class="grid-two">
+        <section class="card">
+          <h3>Andamento mensile</h3>
+          <div id="monthlyChart" class="bars"></div>
+        </section>
+        <section class="card">
+          <h3>Indicatori</h3>
+          <div id="insights" class="insights"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <h3>Riepilogo per categoria</h3>
+            <p>Ricavi, costi, margine e quota sul totale</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Categoria</th><th>Ricavi</th><th>Costi</th><th>Margine</th><th>Margine %</th><th>Quota</th></tr></thead>
+            <tbody id="categoryRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>ReportFlow · demo dimostrativa di automazione reportistica</footer>
+    </section>
+  </main>
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
