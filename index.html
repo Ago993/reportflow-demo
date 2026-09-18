@@ -4,76 +4,139 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ReportFlow — Report automatici da CSV</title>
-  <meta name="description" content="Demo portfolio: carica un CSV e genera KPI, analisi per categoria e report stampabile.">
+  <meta name="description" content="Trasforma un CSV di vendite in KPI, margini, trend e riepiloghi pronti da condividere.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <span class="eyebrow">DEMO PORTFOLIO · REPORT AUTOMATICI</span>
-      <h1>ReportFlow</h1>
-      <p>Trasforma un CSV di vendite in un report leggibile con KPI, margini, categorie e andamento mensile.</p>
-      <div class="privacy">🔒 Elaborazione locale nel browser: nessun file viene inviato a un server.</div>
-    </header>
-
-    <section class="panel no-print">
-      <label class="upload-card">
-        <strong>Carica dati vendite</strong>
-        <span>CSV con data, categoria, ricavi e costi</span>
-        <input id="fileInput" type="file" accept=".csv,text/csv">
-        <small id="fileName">Nessun file selezionato</small>
-      </label>
-      <div class="actions">
-        <button id="sampleBtn" class="secondary">Carica dati demo</button>
-        <button id="analyzeBtn" class="primary" disabled>Genera report</button>
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <a class="product-brand" href="#" aria-label="ReportFlow">
+        <span class="product-logo">RF</span>
+        <span>ReportFlow</span>
+      </a>
+      <div class="topbar-meta">
+        <span class="demo-badge">DEMO PORTFOLIO</span>
+        <span class="local-badge"><span class="status-dot"></span>Dati elaborati in locale</span>
       </div>
-      <p class="hint">Riconoscimento automatico di intestazioni comuni: data/date, categoria/category, ricavi/revenue, costi/cost.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro no-print">
+      <div>
+        <span class="eyebrow">REPORTING · KPI · ANALISI OPERATIVA</span>
+        <h1>Trasforma un CSV grezzo in un report che si capisce al primo sguardo.</h1>
+        <p>ReportFlow sintetizza ricavi, costi, margini, trend mensili e categorie principali in una dashboard pronta da esportare o salvare in PDF.</p>
+      </div>
+      <div class="intro-note">
+        <span class="intro-note-icon">✓</span>
+        <div><strong>Nessun backend</strong><small>Il file resta nel browser.</small></div>
+      </div>
     </section>
 
-    <section id="report" class="report hidden">
-      <div class="report-head">
-        <div>
-          <span class="eyebrow">REPORT GENERATO</span>
-          <h2>Performance commerciale</h2>
-          <p id="periodLabel"></p>
-        </div>
-        <div class="report-actions no-print">
-          <button id="exportBtn" class="secondary">Esporta riepilogo CSV</button>
-          <button id="printBtn" class="primary">Stampa / Salva PDF</button>
-        </div>
-      </div>
-
-      <div id="kpis" class="kpi-grid"></div>
-
-      <div class="grid-two">
-        <section class="card">
-          <h3>Andamento mensile</h3>
-          <div id="monthlyChart" class="bars"></div>
-        </section>
-        <section class="card">
-          <h3>Indicatori</h3>
-          <div id="insights" class="insights"></div>
-        </section>
-      </div>
-
-      <section class="card">
-        <div class="section-title">
+    <section class="workspace">
+      <aside class="control-panel no-print">
+        <div class="panel-header">
           <div>
-            <h3>Riepilogo per categoria</h3>
-            <p>Ricavi, costi, margine e quota sul totale</p>
+            <span class="section-kicker">CONFIGURAZIONE</span>
+            <h2>Genera il report</h2>
+          </div>
+          <span class="ready-pill">CSV</span>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-title">
+            <span class="step">01</span>
+            <div><strong>Dati di partenza</strong><small>Vendite, ricavi e costi</small></div>
+          </div>
+          <label class="file-card">
+            <span class="file-icon">↗</span>
+            <div><strong>Seleziona CSV</strong><small id="fileName">Nessun file selezionato</small></div>
+            <input id="fileInput" type="file" accept=".csv,text/csv">
+          </label>
+        </div>
+        <div class="panel-section compact">
+          <div class="info-row">
+            <span class="info-dot"></span>
+            <p>Riconosce automaticamente intestazioni comuni come data, categoria, ricavi, revenue, costi e cost.</p>
           </div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Categoria</th><th>Ricavi</th><th>Costi</th><th>Margine</th><th>Margine %</th><th>Quota</th></tr></thead>
-            <tbody id="categoryRows"></tbody>
-          </table>
-        </div>
-      </section>
 
-      <footer>ReportFlow · demo dimostrativa di automazione reportistica</footer>
+        <div class="panel-footer">
+          <button id="sampleBtn" class="button secondary-button">Carica esempio</button>
+          <button id="analyzeBtn" class="button primary-button" disabled>Genera report</button>
+        </div>
+      </aside>
+
+      <section class="report-stage">
+        <div class="stage-toolbar no-print">
+          <div>
+            <span class="section-kicker">ANTEPRIMA</span>
+            <strong>Dashboard di performance</strong>
+          </div>
+          <div class="stage-actions">
+            <button id="exportBtn" class="button secondary-button">Esporta CSV</button>
+            <button id="printBtn" class="button primary-button">Stampa / Salva PDF</button>
+          </div>
+        </div>
+
+        <section id="report" class="report hidden">
+          <div class="report-head">
+            <div>
+              <span class="section-kicker">REPORT GENERATO</span>
+              <h2>Performance commerciale</h2>
+              <p id="periodLabel"></p>
+            </div>
+            <span class="report-status"><span class="status-dot"></span>Report pronto</span>
+          </div>
+
+          <div id="kpis" class="kpi-grid"></div>
+
+          <div class="grid-two">
+            <section class="card chart-card">
+              <div class="card-head">
+                <div><span class="section-kicker">TREND</span><h3>Andamento mensile</h3></div>
+                <span class="card-note">Ricavi</span>
+              </div>
+              <div id="monthlyChart" class="bars"></div>
+            </section>
+
+            <section class="card insight-card">
+              <div class="card-head">
+                <div><span class="section-kicker">INSIGHT</span><h3>Indicatori chiave</h3></div>
+              </div>
+              <div id="insights" class="insights"></div>
+            </section>
+          </div>
+
+          <section class="card table-card">
+            <div class="card-head">
+              <div><span class="section-kicker">DETTAGLIO</span><h3>Riepilogo per categoria</h3></div>
+              <span class="card-note">Ricavi · costi · margini</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Categoria</th><th>Ricavi</th><th>Costi</th><th>Margine</th><th>Margine %</th><th>Quota</th></tr></thead>
+                <tbody id="categoryRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <footer>ReportFlow · demo dimostrativa di automazione reportistica</footer>
+        </section>
+
+        <section id="emptyState" class="empty-state no-print">
+          <div class="empty-dashboard">
+            <div class="mini-kpi"></div><div class="mini-kpi"></div><div class="mini-kpi"></div>
+            <div class="mini-chart"><span></span><span></span><span></span><span></span></div>
+          </div>
+          <strong>Il report apparirà qui</strong>
+          <p>Carica un CSV oppure usa i dati demo per generare subito KPI, trend e riepiloghi.</p>
+        </section>
+      </section>
     </section>
   </main>
+
   <script src="core.js"></script>
   <script src="app.js"></script>
 </body>

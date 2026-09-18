@@ -1,11 +1,11 @@
-const $=id=>document.getElementById(id);
+﻿const $=id=>document.getElementById(id);
 let csvText="",lastResult=null;
 
 function money(v){
   return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(v);
 }
 function pct(v){
-  if(v==null||Number.isNaN(v)) return "—";
+  if(v==null||Number.isNaN(v)) return "â€”";
   return (v>0?"+":"")+v.toFixed(1)+"%";
 }
 function monthLabel(key){
@@ -52,7 +52,7 @@ function analyze(){
 function render(){
   const r=lastResult,t=r.totals;
   $("periodLabel").textContent=r.period.from&&r.period.to
-    ? dateLabel(r.period.from)+" — "+dateLabel(r.period.to)
+    ? dateLabel(r.period.from)+" â€” "+dateLabel(r.period.to)
     : "";
   const kpis=[
     ["Ricavi",money(t.revenue)],
@@ -76,9 +76,9 @@ function render(){
   const i=r.insights;
   const growthClass=(i.growthPct??0)>=0?"positive":"negative";
   $("insights").innerHTML=[
-    ['Categoria principale',i.bestCategory?i.bestCategory.category+" · "+money(i.bestCategory.revenue):"—",""],
-    ['Margine % migliore',i.bestMargin?i.bestMargin.category+" · "+pct(i.bestMargin.marginPct):"—",""],
-    ['Variazione ultimo mese',i.growthPct==null?"—":pct(i.growthPct),growthClass]
+    ['Categoria principale',i.bestCategory?i.bestCategory.category+" Â· "+money(i.bestCategory.revenue):"â€”",""],
+    ['Margine % migliore',i.bestMargin?i.bestMargin.category+" Â· "+pct(i.bestMargin.marginPct):"â€”",""],
+    ['Variazione ultimo mese',i.growthPct==null?"â€”":pct(i.growthPct),growthClass]
   ].map(([k,v,c])=>'<div class="insight"><span>'+k+'</span><strong class="'+c+'">'+v+'</strong></div>').join("");
 
   $("categoryRows").innerHTML=r.categories.map(x=>
@@ -94,3 +94,5 @@ function escapeHtml(v){
   return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
 if(new URLSearchParams(location.search).get("demo")==="1") $("sampleBtn").click();
+
+
