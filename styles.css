@@ -146,3 +146,8 @@ tbody tr:last-child td{border-bottom:0}
 }
 
 .empty-state.hidden{display:none!important}
+
+.error-box{margin-top:12px;padding:10px 11px;border:1px solid #f1c8c5;border-radius:10px;background:#fff5f4;color:#9b2c24;font-size:11px;line-height:1.45}
+.error-box.hidden{display:none!important}
+.stage-actions{flex-wrap:wrap}
+@media(max-width:640px){.stage-actions{align-items:stretch}}

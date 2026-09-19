@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ReportFlow — Report automatici da CSV</title>
+  <title>ReportFlow - Report automatici da CSV</title>
   <meta name="description" content="Trasforma un CSV di vendite in KPI, margini, trend e riepiloghi pronti da condividere.">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260919-4">
 </head>
 <body>
   <header class="topbar no-print">
@@ -24,12 +24,12 @@
   <main class="shell">
     <section class="intro no-print">
       <div>
-        <span class="eyebrow">REPORTING · KPI · ANALISI OPERATIVA</span>
+        <span class="eyebrow">REPORTING - KPI - ANALISI OPERATIVA</span>
         <h1>Trasforma un CSV grezzo in un report che si capisce al primo sguardo.</h1>
         <p>ReportFlow sintetizza ricavi, costi, margini, trend mensili e categorie principali in una dashboard pronta da esportare o salvare in PDF.</p>
       </div>
       <div class="intro-note">
-        <span class="intro-note-icon">✓</span>
+        <span class="intro-note-icon">&#10003;</span>
         <div><strong>Nessun backend</strong><small>Il file resta nel browser.</small></div>
       </div>
     </section>
@@ -50,16 +50,18 @@
             <div><strong>Dati di partenza</strong><small>Vendite, ricavi e costi</small></div>
           </div>
           <label class="file-card">
-            <span class="file-icon">↗</span>
+            <span class="file-icon">&#8599;</span>
             <div><strong>Seleziona CSV</strong><small id="fileName">Nessun file selezionato</small></div>
             <input id="fileInput" type="file" accept=".csv,text/csv">
           </label>
         </div>
+
         <div class="panel-section compact">
           <div class="info-row">
             <span class="info-dot"></span>
-            <p>Riconosce automaticamente intestazioni comuni come data, categoria, ricavi, revenue, costi e cost.</p>
+            <p>Riconosce intestazioni comuni e CSV separati da virgola, punto e virgola o tab.</p>
           </div>
+          <div id="errorBox" class="error-box hidden"></div>
         </div>
 
         <div class="panel-footer">
@@ -75,7 +77,8 @@
             <strong>Dashboard di performance</strong>
           </div>
           <div class="stage-actions">
-            <button id="exportBtn" class="button secondary-button">Esporta CSV</button>
+            <button id="exportBtn" class="button secondary-button">Esporta riepilogo</button>
+            <button id="exportDataBtn" class="button secondary-button">Esporta dati</button>
             <button id="printBtn" class="button primary-button">Stampa / Salva PDF</button>
           </div>
         </div>
@@ -112,7 +115,7 @@
           <section class="card table-card">
             <div class="card-head">
               <div><span class="section-kicker">DETTAGLIO</span><h3>Riepilogo per categoria</h3></div>
-              <span class="card-note">Ricavi · costi · margini</span>
+              <span class="card-note">Ricavi - costi - margini</span>
             </div>
             <div class="table-wrap">
               <table>
@@ -122,7 +125,7 @@
             </div>
           </section>
 
-          <footer>ReportFlow · demo dimostrativa di automazione reportistica</footer>
+          <footer>ReportFlow - demo dimostrativa di automazione reportistica</footer>
         </section>
 
         <section id="emptyState" class="empty-state no-print">
@@ -130,14 +133,14 @@
             <div class="mini-kpi"></div><div class="mini-kpi"></div><div class="mini-kpi"></div>
             <div class="mini-chart"><span></span><span></span><span></span><span></span></div>
           </div>
-          <strong>Il report apparirà qui</strong>
+          <strong>Il report apparir&agrave; qui</strong>
           <p>Carica un CSV oppure usa i dati demo per generare subito KPI, trend e riepiloghi.</p>
         </section>
       </section>
     </section>
   </main>
 
-  <script src="core.js"></script>
-  <script src="app.js"></script>
+  <script src="core.js?v=20260919-4"></script>
+  <script src="app.js?v=20260919-4"></script>
 </body>
 </html>

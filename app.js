@@ -15,39 +15,70 @@ function monthLabel(key){
 function dateLabel(d){
   return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(d);
 }
+function showError(message){
+  $("errorBox").textContent=message;
+  $("errorBox").classList.remove("hidden");
+}
+function clearError(){ $("errorBox").classList.add("hidden"); }
+
+async function readTextFile(file){
+  const buffer=await file.arrayBuffer();
+  try{
+    return new TextDecoder("utf-8",{fatal:true}).decode(buffer);
+  }catch{
+    return new TextDecoder("windows-1252").decode(buffer);
+  }
+}
 
 $("fileInput").addEventListener("change",async e=>{
   const file=e.target.files[0];
   if(!file) return;
-  csvText=await file.text();
-  $("fileName").textContent=file.name;
-  $("analyzeBtn").disabled=false;
+  try{
+    csvText=await readTextFile(file);
+    $("fileName").textContent=file.name;
+    $("analyzeBtn").disabled=false;
+    clearError();
+  }catch(err){
+    showError("Impossibile leggere il file: "+err.message);
+  }
 });
 $("sampleBtn").addEventListener("click",async()=>{
   try{
     csvText=await fetch("samples/sales.csv").then(r=>r.text());
     $("fileName").textContent="sales.csv (demo)";
     $("analyzeBtn").disabled=false;
+    clearError();
     analyze();
-  }catch(err){alert("Impossibile caricare i dati demo: "+err.message);}
+  }catch(err){showError("Impossibile caricare i dati demo: "+err.message);}
 });
 $("analyzeBtn").addEventListener("click",analyze);
 $("printBtn").addEventListener("click",()=>window.print());
 $("exportBtn").addEventListener("click",()=>{
   if(!lastResult) return;
-  const blob=new Blob([ReportFlow.summaryCSV(lastResult)],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download="reportflow-riepilogo.csv";a.click();URL.revokeObjectURL(url);
+  downloadCSV(ReportFlow.summaryCSV(lastResult),"reportflow-riepilogo.csv");
 });
+$("exportDataBtn").addEventListener("click",()=>{
+  if(!lastResult) return;
+  downloadCSV(ReportFlow.normalizedCSV(lastResult),"reportflow-dati.csv");
+});
+
+function downloadCSV(text,name){
+  const blob=new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
+}
 
 function analyze(){
   try{
+    clearError();
     lastResult=ReportFlow.analyze(ReportFlow.parseCSV(csvText));
     render();
     $("report").classList.remove("hidden");
     $("emptyState").classList.add("hidden");
     $("report").scrollIntoView({behavior:"smooth",block:"start"});
-  }catch(err){alert(err.message);}
+  }catch(err){
+    showError(err.message+" Formati supportati: CSV separati da virgola, punto e virgola o tab.");
+  }
 }
 
 function render(){
@@ -95,5 +126,3 @@ function escapeHtml(v){
   return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
 if(new URLSearchParams(location.search).get("demo")==="1") $("sampleBtn").click();
-
-
