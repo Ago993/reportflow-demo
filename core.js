@@ -3,9 +3,21 @@
   if(typeof module==="object"&&module.exports) module.exports=api;
   else root.ReportFlow=api;
 })(typeof self!=="undefined"?self:this,function(){
+  const LIMITS={csvChars:5_000_000,csvRows:10_000,csvColumns:100,fieldChars:10_000};
+
   function norm(value){
     return String(value??"").trim().toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  }
+
+  function protectSpreadsheetText(value){
+    const s=String(value??"");
+    return /^\s*[=+\-@]/.test(s)?"'"+s:s;
+  }
+
+  function unprotectSpreadsheetText(value){
+    const s=String(value??"");
+    return /^'\s*[=+\-@]/.test(s)?s.slice(1):s;
   }
 
   function detectDelimiter(text){
@@ -21,24 +33,35 @@
   }
 
   function parseCSV(text){
-    const rows=[]; let row=[]; let field=""; let quoted=false;
     const s=String(text).replace(/^\uFEFF/,"");
+    if(s.length>LIMITS.csvChars) throw new Error("CSV troppo grande.");
+    const rows=[];let row=[];let field="";let quoted=false;
     const delimiter=detectDelimiter(s);
+    function pushField(){
+      if(field.length>LIMITS.fieldChars) throw new Error("Campo CSV troppo lungo.");
+      row.push(field);field="";
+      if(row.length>LIMITS.csvColumns) throw new Error("Troppe colonne nel CSV.");
+    }
+    function pushRow(){
+      if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+      row=[];
+      if(rows.length>LIMITS.csvRows+1) throw new Error("Troppe righe nel CSV.");
+    }
     for(let i=0;i<s.length;i++){
-      const ch=s[i], next=s[i+1];
+      const ch=s[i],next=s[i+1];
       if(ch==='"'){
         if(quoted&&next==='"'){field+='"';i++;}
         else quoted=!quoted;
-      }else if(ch===delimiter&&!quoted){row.push(field);field="";}
+      }else if(ch===delimiter&&!quoted){pushField();}
       else if((ch==="\n"||ch==="\r")&&!quoted){
         if(ch==="\r"&&next==="\n") i++;
-        row.push(field);field="";
-        if(row.some(v=>String(v).trim()!=="")) rows.push(row);
-        row=[];
-      }else field+=ch;
+        pushField();pushRow();
+      }else{
+        field+=ch;
+        if(field.length>LIMITS.fieldChars) throw new Error("Campo CSV troppo lungo.");
+      }
     }
-    row.push(field);
-    if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+    pushField();pushRow();
     if(rows.length<2) throw new Error("Il CSV non contiene righe dati.");
     const headers=rows[0].map(h=>String(h).trim());
     if(headers.length<2) throw new Error("Separatore CSV non riconosciuto.");
@@ -61,12 +84,13 @@
   function parseNumber(value){
     let s=String(value??"").trim().replace(/[€$£\s]/g,"");
     if(!s) return NaN;
-    const comma=s.lastIndexOf(","), dot=s.lastIndexOf(".");
+    const comma=s.lastIndexOf(","),dot=s.lastIndexOf(".");
     if(comma>=0&&dot>=0){
       if(comma>dot) s=s.replace(/\./g,"").replace(",",".");
       else s=s.replace(/,/g,"");
     }else if(comma>=0) s=s.replace(",",".");
-    return Number(s);
+    const n=Number(s);
+    return Number.isFinite(n)?n:NaN;
   }
 
   function parseDate(value){
@@ -88,8 +112,8 @@
     const revenue=detect(h,["ricavi","revenue","vendite","sales","fatturato","totale ricavi"]);
     const cost=detect(h,["costi","cost","costo","costs","spese","totale costi"]);
     if(!date||!category||!revenue||!cost){
-      const looksLikeSummary=detect(h,["margine","margine %","quota %"]) && category && revenue && cost && !date;
-      if(looksLikeSummary) throw new Error("Questo file e un riepilogo esportato. Per rigenerare il report usa il pulsante 'Esporta dati' oppure un CSV con data, categoria, ricavi e costi.");
+      const looksLikeSummary=detect(h,["margine","margine %","quota %"])&&category&&revenue&&cost&&!date;
+      if(looksLikeSummary) throw new Error("Questo file e un riepilogo esportato. Usa 'Esporta dati' oppure un CSV con data, categoria, ricavi e costi.");
       throw new Error("Servono colonne per data, categoria, ricavi e costi.");
     }
     return {date,category,revenue,cost};
@@ -105,7 +129,8 @@
       const date=parseDate(r[s.date]);
       const revenue=parseNumber(r[s.revenue]);
       const cost=parseNumber(r[s.cost]);
-      const category=String(r[s.category]||"Senza categoria").trim()||"Senza categoria";
+      const category=unprotectSpreadsheetText(String(r[s.category]||"Senza categoria")).trim()||"Senza categoria";
+      if(category.length>LIMITS.fieldChars) throw new Error("Categoria troppo lunga alla riga "+(index+2)+".");
       if(!date) throw new Error("Data non valida alla riga "+(index+2)+".");
       if(Number.isNaN(revenue)||Number.isNaN(cost)) throw new Error("Valore numerico non valido alla riga "+(index+2)+".");
       return {date,category,revenue,cost,margin:revenue-cost};
@@ -142,15 +167,12 @@
     const bestMargin=[...categories].sort((a,b)=>b.marginPct-a.marginPct)[0]||null;
     let growthPct=null;
     if(months.length>=2){
-      const prev=months[months.length-2].revenue, curr=months[months.length-1].revenue;
+      const prev=months[months.length-2].revenue,curr=months[months.length-1].revenue;
       growthPct=prev?((curr-prev)/prev)*100:null;
     }
 
     return {
-      rows:clean,
-      totals,
-      categories,
-      months,
+      rows:clean,totals,categories,months,
       period:{from:clean[0]?.date||null,to:clean[clean.length-1]?.date||null},
       insights:{bestCategory,bestMargin,growthPct}
     };
@@ -164,7 +186,8 @@
   function summaryCSV(result){
     const head=["Categoria","Ricavi","Costi","Margine","Margine %","Quota %"];
     const rows=result.categories.map(x=>[
-      x.category,x.revenue.toFixed(2),x.cost.toFixed(2),x.margin.toFixed(2),x.marginPct.toFixed(2),x.share.toFixed(2)
+      protectSpreadsheetText(x.category),
+      x.revenue.toFixed(2),x.cost.toFixed(2),x.margin.toFixed(2),x.marginPct.toFixed(2),x.share.toFixed(2)
     ]);
     return [head,...rows].map(r=>r.map(escapeCsv).join(",")).join("\n");
   }
@@ -173,12 +196,15 @@
     const head=["data","categoria","ricavi","costi"];
     const rows=result.rows.map(x=>[
       x.date.getFullYear()+"-"+String(x.date.getMonth()+1).padStart(2,"0")+"-"+String(x.date.getDate()).padStart(2,"0"),
-      x.category,
+      protectSpreadsheetText(x.category),
       x.revenue.toFixed(2),
       x.cost.toFixed(2)
     ]);
     return [head,...rows].map(r=>r.map(escapeCsv).join(",")).join("\n");
   }
 
-  return {parseCSV,parseNumber,parseDate,analyze,summaryCSV,normalizedCSV};
+  return {
+    LIMITS,parseCSV,parseNumber,parseDate,analyze,summaryCSV,normalizedCSV,
+    protectSpreadsheetText,unprotectSpreadsheetText
+  };
 });
