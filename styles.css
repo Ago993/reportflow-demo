@@ -144,3 +144,5 @@ tbody tr:last-child td{border-bottom:0}
   .card,.kpi{break-inside:avoid}
   .bar{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+.empty-state.hidden{display:none!important}
